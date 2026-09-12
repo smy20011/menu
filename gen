@@ -1,0 +1,2 @@
+#!/bin/bash
+uv run menu $(date -d 'next Monday' '+%F') "$@"
