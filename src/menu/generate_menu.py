@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 
-from dataclasses import dataclass
-from glob import glob
-import json
-from os import PathLike
-from random import shuffle
-import re
-import subprocess
-from typing import Any
-from datetime import datetime, timedelta
-from pathlib import Path
 import argparse
+import json
+import subprocess
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from glob import glob
+from pathlib import Path
+from random import shuffle
+from typing import Any
 
 
 @dataclass
@@ -57,8 +55,7 @@ class Menu:
             fragments.append(date.strftime('### %A (%Y-%m-%d)'))
             fragments.append("")
             for category, recipe in self.menu[day].items():
-                fragments.append(f"- {category}: {recipe.metadata.filename}")
-                fragments.append("")
+                fragments.append(f"- {category}: {recipe.name}")
             fragments.append("")
         return "\n".join(fragments)
 
@@ -114,8 +111,8 @@ def write_report(menu_file: Path, date: datetime, menu: Menu, dest: Path):
     for category in data:
         result.append(f"### {category['category']}")
         result.append("")
-        for item in category:
-            result.append(f"- [ ] {item.name}")
+        for item in category["items"]:
+            result.append(f"- [ ] {item['name']}")
         result.append("")
 
     result.append("## 每日菜谱")
@@ -125,7 +122,7 @@ def write_report(menu_file: Path, date: datetime, menu: Menu, dest: Path):
 def main():
     parser = argparse.ArgumentParser("Menu Gen: Generate Random Menu")
     parser.add_argument("-f", '--force', action='store_true', help='Override existing menus')
-    parser.add_argument("--glob", help="Glob pattern for cook files, default *.cook", default="*.cook")
+    parser.add_argument("--glob", help="Glob pattern for cook files, default *.cook", default="**/*.cook")
     parser.add_argument("--days", help="Number of days to generate", default=7, type=int)
     parser.add_argument('date', help='Generate Menu for following date, should be in format like 2026-01-23')
     opts = parser.parse_args()
