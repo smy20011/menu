@@ -1,0 +1,9 @@
+# 每周儿童营养菜单
+
+{% for section in sections %}
+### {{ section.name }}
+
+{% for item in section %}
+{{ item }}
+{% endfor %}
+{% endfor %}

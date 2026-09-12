@@ -1,0 +1,9 @@
+# 🛒 每周食材采购清单
+
+{% for aisle, items in aisled(ingredients) | items %}
+## {{ aisle }}
+{% for i in items %}
+- [ ] {{ i.name }}
+{% endfor %}
+
+{% endfor %}

@@ -1,0 +1,5 @@
+# This directory is a Syncthing folder marker.
+# Do not delete.
+
+folderID: xvdcc-ptr9i
+created: 2026-09-11T21:10:05-07:00
