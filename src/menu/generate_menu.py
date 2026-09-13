@@ -3,6 +3,7 @@
 import argparse
 import json
 import subprocess
+import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from glob import glob
@@ -48,19 +49,12 @@ class Menu:
             fragments.append("")
         return "\n".join(fragments)
 
-    def markdown_menu(self, starting_date: datetime) -> str:
-        fragments = []
-        for day, menu_day in enumerate(self.menu):
-            date = starting_date + timedelta(day)
-            fragments.append(date.strftime('### %A (%Y-%m-%d)'))
-            fragments.append("")
-            for category, recipe in self.menu[day].items():
-                fragments.append(f"- {category}: {recipe.name}")
-            fragments.append("")
-        return "\n".join(fragments)
-
-def cook_cli(*args: str) -> Any:
-    return json.loads(subprocess.run(["cook"] + list(args), text=True, check=True, capture_output=True).stdout)
+def cook_cli(*args: str, parse_json=True) -> Any:
+    result = subprocess.run(["cook"] + list(args), text=True, check=True, capture_output=True).stdout
+    if parse_json:
+        return json.loads(result)
+    else:
+        return result
 
 def generate_menu(recipes: Recipes, days=7) -> Menu:
     categories = ["主食", "肉菜", "素菜"]
@@ -102,10 +96,11 @@ def extract_recipes(pathname: str) -> Recipes:
 
 def write_menu(menu: Menu, date: datetime, dest: Path, override: bool = False):
     if dest.exists() and not override:
-        raise ValueError(f"{dest} already exists, use -f to override.")
+        print(f"{dest} already exists, use -f to override.")
+        return
     dest.write_text(menu.cooklang_menu(date))
 
-def write_report(menu_file: Path, date: datetime, menu: Menu, dest: Path):
+def write_report(menu_file: Path, date: datetime, dest: Path):
     data = cook_cli("shopping-list", "--format", "json", str(menu_file))
     result = ["# 菜谱", "## 购物清单"]
     for category in data:
@@ -116,7 +111,10 @@ def write_report(menu_file: Path, date: datetime, menu: Menu, dest: Path):
         result.append("")
 
     result.append("## 每日菜谱")
-    result.append(menu.markdown_menu(date))
+    menu_text = cook_cli("recipe", "--format", "markdown", str(menu_file), parse_json=False)
+    menu_text = re.sub("# .*Steps", "", menu_text, flags=re.DOTALL)
+    menu_text = re.sub("\\.cook", "", menu_text)
+    result.append(menu_text)
     dest.write_text("\n".join(result))
 
 def main():
@@ -134,7 +132,7 @@ def main():
     menu_dest = Path("menus") / date.strftime("%Y-%m-%d.menu")
     report_dest = Path("menus") / date.strftime("%Y-%m-%d.md")
     write_menu(menu, date, menu_dest, override=opts.force)
-    write_report(menu_dest, date, menu, report_dest)
+    write_report(menu_dest, date, report_dest)
 
 if __name__ == "__main__":
     main()
