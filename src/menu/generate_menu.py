@@ -4,6 +4,7 @@ import argparse
 import json
 import subprocess
 import re
+import tomllib
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from glob import glob
@@ -30,8 +31,12 @@ class Recipe:
 class Recipes:
     recipes: list[Recipe]
 
-    def by_tag(self, tag: str) -> list[Recipe]:
-        return [r for r in self.recipes if tag in r.metadata.tags]
+    def by_tag(self, *tags: str) -> list[Recipe]:
+        result = []
+        for r in self.recipes:
+            if all([tag in r.metadata.tags for tag in tags]):
+                result.append(r)
+        return result
 
 @dataclass
 class Menu:
@@ -56,23 +61,26 @@ def cook_cli(*args: str, parse_json=True) -> Any:
     else:
         return result
 
-def generate_menu(recipes: Recipes, days=7) -> Menu:
-    categories = ["主食", "肉菜", "素菜"]
+def generate_menu(recipes: Recipes, config: Any, date: datetime, days=7) -> Menu:
     recipes_by_category = {}
-    for category in categories:
-        meals = recipes.by_tag(category)
-        if len(meals) < days:
-            raise ValueError(
-                f"Category {category} do not have enough recipes, want {days} got {len(meals)}"
-            )
+    categories = list(config.keys())
+    for name, category in config.items():
+        # Make sure there is no OOB
+        tags = category['tags']
+        meals = recipes.by_tag(*tags) * days
         shuffle(meals)
-        recipes_by_category[category] = meals
+        if len(meals) == 0:
+            raise ValueError(f"Cannot find recipes for tags {tags}")
+        recipes_by_category[name] = meals
 
     result = []
     for d in range(days):
+        current_date = date + timedelta(days = d)
         per_day = {}
         for category in categories:
-            per_day[category] = recipes_by_category[category][d]
+            days = config[category].get("days", list(range(7)))
+            if current_date.weekday() in days:
+                per_day[category] = recipes_by_category[category][d]
         result.append(per_day)
     return Menu(result)
 
@@ -117,18 +125,24 @@ def write_report(menu_file: Path, date: datetime, dest: Path):
     result.append(menu_text)
     dest.write_text("\n".join(result))
 
+def load_config(path: str):
+    with open(path, "rb") as f:
+        return tomllib.load(f)
+
 def main():
     parser = argparse.ArgumentParser("Menu Gen: Generate Random Menu")
     parser.add_argument("-f", '--force', action='store_true', help='Override existing menus')
     parser.add_argument("--glob", help="Glob pattern for cook files, default *.cook", default="**/*.cook")
     parser.add_argument("--days", help="Number of days to generate", default=7, type=int)
+    parser.add_argument("--config", help="Menu generation config", default="config.toml")
     parser.add_argument('date', help='Generate Menu for following date, should be in format like 2026-01-23')
     opts = parser.parse_args()
 
     date = datetime.strptime(opts.date, "%Y-%m-%d")
+    config = load_config(opts.config)
 
     recipes = extract_recipes(opts.glob)
-    menu = generate_menu(recipes, opts.days)
+    menu = generate_menu(recipes, config, date, opts.days)
     menu_dest = Path("menus") / date.strftime("%Y-%m-%d.menu")
     report_dest = Path("menus") / date.strftime("%Y-%m-%d.md")
     write_menu(menu, date, menu_dest, override=opts.force)

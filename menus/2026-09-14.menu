@@ -1,62 +1,84 @@
 == Monday (2026-09-14) ==
 
-主食: @./babyfood/番茄肉末拌面.cook{}
+宝宝-主食: @./babyfood/鲜蔬意大利面.cook{}
 
-肉菜: @./babyfood/豆腐烩鱼片.cook{}
+宝宝-肉菜: @./babyfood/土豆胡萝卜炖猪肉.cook{}
 
-素菜: @./babyfood/香煎胡萝卜马铃薯.cook{}
+宝宝-素菜: @./babyfood/香菇炒青菜.cook{}
+
+减肥餐-晚餐: @./diet/牛肉咖喱饭.cook{}
+
+减肥餐-午餐: @./diet/西兰花虾仁蒸蛋.cook{}
 
 
 == Tuesday (2026-09-15) ==
 
-主食: @./babyfood/茄汁肉丸通心粉.cook{}
+宝宝-主食: @./babyfood/海鲜红酱意大利面.cook{}
 
-肉菜: @./babyfood/黄瓜炒肉片.cook{}
+宝宝-肉菜: @./babyfood/马铃薯炖牛肉.cook{}
 
-素菜: @./babyfood/葱烧豆腐.cook{}
+宝宝-素菜: @./babyfood/香菇炒青菜.cook{}
+
+减肥餐-晚餐: @./diet/盐葱鸡排饭.cook{}
 
 
 == Wednesday (2026-09-16) ==
 
-主食: @./babyfood/香菇肉沫炒饭.cook{}
+宝宝-主食: @./babyfood/猪肉高丽菜焖饭.cook{}
 
-肉菜: @./babyfood/宝宝麻婆豆腐.cook{}
+宝宝-肉菜: @./babyfood/牛绞肉炒蛋.cook{}
 
-素菜: @./babyfood/清焖节瓜.cook{}
+宝宝-素菜: @./babyfood/清炒花椰菜.cook{}
+
+减肥餐-晚餐: @./diet/番茄金针菇拌饭.cook{}
 
 
 == Thursday (2026-09-17) ==
 
-主食: @./babyfood/鸡肉花椰菜拌意大利面.cook{}
+宝宝-主食: @./babyfood/三文鱼蛋炒饭.cook{}
 
-肉菜: @./babyfood/豆腐炒肉丝.cook{}
+宝宝-肉菜: @./babyfood/照烧鸡.cook{}
 
-素菜: @./babyfood/胡萝卜炒蛋.cook{}
+宝宝-素菜: @./babyfood/清焖节瓜.cook{}
+
+减肥餐-晚餐: @./diet/口蘑冬瓜牛肉面.cook{}
 
 
 == Friday (2026-09-18) ==
 
-主食: @./babyfood/儿童牛肉咖喱饭.cook{}
+宝宝-主食: @./babyfood/玉米鱼片烩饭.cook{}
 
-肉菜: @./babyfood/节瓜炒鸡蓉.cook{}
+宝宝-肉菜: @./babyfood/肉丸土豆泥配西兰花.cook{}
 
-素菜: @./babyfood/清炒花椰菜.cook{}
+宝宝-素菜: @./babyfood/家常豆腐.cook{}
+
+减肥餐-晚餐: @./diet/菌菇鸡腿焖饭.cook{}
+
+减肥餐-午餐: @./diet/南瓜牛肉焖饭.cook{}
 
 
 == Saturday (2026-09-19) ==
 
-主食: @./babyfood/古早味瘦肉粥.cook{}
+宝宝-主食: @./babyfood/味噌猪肉杂蔬拌饭.cook{}
 
-肉菜: @./babyfood/地瓜烧鸡.cook{}
+宝宝-肉菜: @./babyfood/照烧鸡.cook{}
 
-素菜: @./babyfood/卤豆腐大白菜.cook{}
+宝宝-素菜: @./babyfood/炒栉瓜.cook{}
+
+减肥餐-晚餐: @./diet/低卡三鲜汤.cook{}
+
+减肥餐-午餐: @./diet/番茄焖饭.cook{}
 
 
 == Sunday (2026-09-20) ==
 
-主食: @./babyfood/牛肉胡萝卜汤面.cook{}
+宝宝-主食: @./babyfood/味噌海鲜乌龙面.cook{}
 
-肉菜: @./babyfood/蜜汁猪肉.cook{}
+宝宝-肉菜: @./babyfood/牛肉碎香煎蛋.cook{}
 
-素菜: @./babyfood/清炒黄瓜.cook{}
+宝宝-素菜: @./babyfood/清炒高丽菜.cook{}
+
+减肥餐-晚餐: @./diet/肉末豆腐饭.cook{}
+
+减肥餐-午餐: @./diet/黑椒鸡肉杏鲍菇.cook{}
 
