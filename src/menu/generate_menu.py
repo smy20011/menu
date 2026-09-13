@@ -108,7 +108,7 @@ def write_menu(menu: Menu, date: datetime, dest: Path, override: bool = False):
         return
     dest.write_text(menu.cooklang_menu(date))
 
-def write_report(menu_file: Path, date: datetime, dest: Path):
+def write_report(menu_file: Path, recipes: Recipes, date: datetime, dest: Path):
     data = cook_cli("shopping-list", "--format", "json", str(menu_file))
     result = ["# 菜谱", "## 购物清单"]
     for category in data:
@@ -118,11 +118,28 @@ def write_report(menu_file: Path, date: datetime, dest: Path):
             result.append(f"- [ ] {item['name']}")
         result.append("")
 
+    data = cook_cli("recipe", "--format", "json", str(menu_file))
     result.append("## 每日菜谱")
-    menu_text = cook_cli("recipe", "--format", "markdown", str(menu_file), parse_json=False)
-    menu_text = re.sub("# .*Steps", "", menu_text, flags=re.DOTALL)
-    menu_text = re.sub("\\.cook", "", menu_text)
-    result.append(menu_text)
+    for section in data['sections']:
+        result.append(f"### {section['name']}")
+        for idx, steps in enumerate(section['content']):
+            line = f"{idx + 1}. "
+            for item in steps["value"]['items']:
+                if item['type'] == 'text':
+                    line += item['value']
+                else:
+                    ingredient = data['ingredients'][item['index']]
+                    full_path = "/".join(ingredient['reference']['components'] + [ingredient['reference']['name']])
+                    found = [r for r in recipes.recipes if full_path.endswith(r.metadata.filename)]
+                    assert len(found) > 0, f"Cannot find recipe {full_path}"
+                    recipe = found[0]
+                    if recipe.metadata.source.startswith("http"):
+                        line += f"[{recipe.name}]({recipe.metadata.source})"
+                    else:
+                        line += f"{recipe.name}"
+            result.append(line)
+        result.append("")
+
     dest.write_text("\n".join(result))
 
 def load_config(path: str):
@@ -146,7 +163,7 @@ def main():
     menu_dest = Path("menus") / date.strftime("%Y-%m-%d.menu")
     report_dest = Path("menus") / date.strftime("%Y-%m-%d.md")
     write_menu(menu, date, menu_dest, override=opts.force)
-    write_report(menu_dest, date, report_dest)
+    write_report(menu_dest, recipes, date, report_dest)
 
 if __name__ == "__main__":
     main()
