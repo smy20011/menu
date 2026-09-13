@@ -1,84 +1,84 @@
 == Monday (2026-09-14) ==
 
-宝宝-主食: @./babyfood/三文鱼蔬菜拌饭.cook{}
+宝宝-主食: @./babyfood/番茄土豆烩牛肉盖饭.cook{}
 
-宝宝-肉菜: @./babyfood/番茄炒牛肉.cook{}
+宝宝-肉菜: @./babyfood/糖醋鱼片.cook{}
 
-宝宝-素菜: @./babyfood/红烧豆腐.cook{}
+宝宝-素菜: @./babyfood/清焖节瓜.cook{}
 
-减肥餐-晚餐: @./diet/茄汁西葫芦烩饭.cook{}
+减肥餐-晚餐: @./diet/番茄鲜虾滑蛋.cook{}
 
-减肥餐-午餐: @./diet/番茄炖鸡肉.cook{}
+减肥餐-午餐: @./diet/地三鲜焖饭.cook{}
 
 
 == Tuesday (2026-09-15) ==
 
-宝宝-主食: @./babyfood/鸡肉奶油玉米通心粉.cook{}
+宝宝-主食: @./babyfood/儿童抱蛋煎饺.cook{}
 
-宝宝-肉菜: @./babyfood/毛豆炒鸡丁.cook{}
+宝宝-肉菜: @./babyfood/番茄鱼片.cook{}
 
-宝宝-素菜: @./babyfood/清炒花椰菜.cook{}
+宝宝-素菜: @./babyfood/蒜香炒青菜.cook{}
 
-减肥餐-晚餐: @./diet/口蘑鸡腿焖饭.cook{}
+减肥餐-晚餐: @./diet/包菜炒鸡蛋.cook{}
 
 
 == Wednesday (2026-09-16) ==
 
-宝宝-主食: @./babyfood/鸡蓉胡萝卜玉米粥.cook{}
-
-宝宝-肉菜: @./babyfood/土豆胡萝卜炖猪肉.cook{}
-
-宝宝-素菜: @./babyfood/清炒花椰菜.cook{}
-
-减肥餐-晚餐: @./diet/鸡肉焖饭.cook{}
-
-
-== Thursday (2026-09-17) ==
-
-宝宝-主食: @./babyfood/红烧牛肉面.cook{}
-
-宝宝-肉菜: @./babyfood/红烧肉.cook{}
-
-宝宝-素菜: @./babyfood/清炒高丽菜.cook{}
-
-减肥餐-晚餐: @./diet/包菜鸡腿焖饭.cook{}
-
-
-== Friday (2026-09-18) ==
-
-宝宝-主食: @./babyfood/茄汁肉丸通心粉.cook{}
+宝宝-主食: @./babyfood/三文鱼蛋炒饭.cook{}
 
 宝宝-肉菜: @./babyfood/牛肉碎香煎蛋.cook{}
 
 宝宝-素菜: @./babyfood/清炒青江菜.cook{}
 
-减肥餐-晚餐: @./diet/菌菇鸡腿饭.cook{}
+减肥餐-晚餐: @./diet/低卡蒸鸡腿.cook{}
 
-减肥餐-午餐: @./diet/豆豉干煎鸡.cook{}
+
+== Thursday (2026-09-17) ==
+
+宝宝-主食: @./babyfood/番茄土豆烩牛肉盖饭.cook{}
+
+宝宝-肉菜: @./babyfood/毛豆炒鸡丁.cook{}
+
+宝宝-素菜: @./babyfood/玉米炒蛋.cook{}
+
+减肥餐-晚餐: @./diet/裙带菜虾仁豆腐汤.cook{}
+
+
+== Friday (2026-09-18) ==
+
+宝宝-主食: @./babyfood/古早味牛肉粥.cook{}
+
+宝宝-肉菜: @./babyfood/地瓜烧鸡.cook{}
+
+宝宝-素菜: @./babyfood/胡萝卜炒包菜.cook{}
+
+减肥餐-晚餐: @./diet/番茄豆腐牛肉.cook{}
+
+减肥餐-午餐: @./diet/包菜炒鸡胸.cook{}
 
 
 == Saturday (2026-09-19) ==
 
-宝宝-主食: @./babyfood/牛肉蔬菜炒面.cook{}
+宝宝-主食: @./babyfood/古早味牛肉粥.cook{}
 
-宝宝-肉菜: @./babyfood/豆腐烩鱼片.cook{}
+宝宝-肉菜: @./babyfood/土豆胡萝卜炖牛肉.cook{}
 
 宝宝-素菜: @./babyfood/红烧豆腐.cook{}
 
-减肥餐-晚餐: @./diet/豆腐虾仁蒸蛋.cook{}
+减肥餐-晚餐: @./diet/香煎鸡排饭.cook{}
 
-减肥餐-午餐: @./diet/葱姜鸡腿焖饭.cook{}
+减肥餐-午餐: @./diet/酱油焖鸡饭.cook{}
 
 
 == Sunday (2026-09-20) ==
 
-宝宝-主食: @./babyfood/玉米鱼片烩饭.cook{}
+宝宝-主食: @./babyfood/家常儿童拌面.cook{}
 
-宝宝-肉菜: @./babyfood/土豆胡萝卜炖猪肉.cook{}
+宝宝-肉菜: @./babyfood/地瓜烧鸡.cook{}
 
-宝宝-素菜: @./babyfood/西兰花拌豆腐.cook{}
+宝宝-素菜: @./babyfood/胡萝卜炒蛋.cook{}
 
-减肥餐-晚餐: @./diet/黄瓜牛肉拌饭.cook{}
+减肥餐-晚餐: @./diet/低卡版公瑾爆蛋.cook{}
 
-减肥餐-午餐: @./diet/南瓜沙拉.cook{}
+减肥餐-午餐: @./diet/烤馒头.cook{}
 
