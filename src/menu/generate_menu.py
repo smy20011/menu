@@ -67,7 +67,9 @@ def generate_menu(recipes: Recipes, config: Any, date: datetime, days=7) -> Menu
     for name, category in config.items():
         # Make sure there is no OOB
         tags = category['tags']
-        meals = recipes.by_tag(*tags) * days
+        meals = recipes.by_tag(*tags)
+        if len(meals) < days:
+            meals = meals * days
         shuffle(meals)
         if len(meals) == 0:
             raise ValueError(f"Cannot find recipes for tags {tags}")
