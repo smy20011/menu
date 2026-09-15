@@ -91,7 +91,7 @@ def extract_recipes(pathname: str) -> Recipes:
         data = cook_cli("recipe", "--format", "json", filename)
         metadata = Metadata(
             tags=data["metadata"]["map"]["tags"],
-            source=data["metadata"]["map"]["source"],
+            source=data["metadata"]["map"].get("source", ""),
             filename=filename,
         )
         recipe = Recipe(

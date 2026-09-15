@@ -1,42 +1,84 @@
 == Monday (2026-09-14) ==
 
-减肥餐-晚餐: @./diet/虾滑生菜拌饭.cook{}
+减肥餐-晚餐: @./diet/低卡韩式拌饭.cook{}
 
-减肥餐-午餐: @./diet/肉末拌饭.cook{}
+减肥餐-午餐: @./diet/口蘑虾滑.cook{}
+
+宝宝餐-主食: @./babyfood/家常软香鸡蛋饼.cook{}
+
+宝宝餐-肉菜: @./babyfood/卤香鹌鹑蛋.cook{}
+
+宝宝餐-素菜: @./babyfood/番茄白花菜.cook{}
 
 
 == Tuesday (2026-09-15) ==
 
-减肥餐-晚餐: @./diet/橙香鸡腿饭.cook{}
+减肥餐-晚餐: @./diet/凉拌豆腐拌饭.cook{}
+
+宝宝餐-主食: @./babyfood/面.cook{}
+
+宝宝餐-肉菜: @./babyfood/豆角肉末.cook{}
+
+宝宝餐-素菜: @./babyfood/番茄白花菜.cook{}
 
 
 == Wednesday (2026-09-16) ==
 
-减肥餐-晚餐: @./diet/鸡肉土豆烩饭.cook{}
+减肥餐-晚餐: @./diet/菠菜蟹柳滑蛋.cook{}
+
+宝宝餐-主食: @./babyfood/米饭.cook{}
+
+宝宝餐-肉菜: @./babyfood/红烧鸡腿.cook{}
+
+宝宝餐-素菜: @./babyfood/蒸紫薯.cook{}
 
 
 == Thursday (2026-09-17) ==
 
-减肥餐-晚餐: @./diet/虾仁豆腐抱蛋.cook{}
+减肥餐-晚餐: @./diet/牛肉芝士焗蛋.cook{}
+
+宝宝餐-主食: @./babyfood/牛肉蘑菇炒饭.cook{}
+
+宝宝餐-肉菜: @./babyfood/番茄土豆牛肉.cook{}
+
+宝宝餐-素菜: @./babyfood/清炒嫩豌豆.cook{}
 
 
 == Friday (2026-09-18) ==
 
-减肥餐-晚餐: @./diet/鸡蛋肉末拌饭.cook{}
+减肥餐-晚餐: @./diet/酸辣柠檬虾.cook{}
 
-减肥餐-午餐: @./diet/燕麦碗.cook{}
+减肥餐-午餐: @./diet/茄汁虾片.cook{}
+
+宝宝餐-主食: @./babyfood/家常软香鸡蛋饼.cook{}
+
+宝宝餐-肉菜: @./babyfood/虾滑炒蛋.cook{}
+
+宝宝餐-素菜: @./babyfood/番茄炒蛋.cook{}
 
 
 == Saturday (2026-09-19) ==
 
-减肥餐-晚餐: @./diet/南瓜牛肉焖饭.cook{}
+减肥餐-晚餐: @./diet/酸辣柠檬虾片.cook{}
 
-减肥餐-午餐: @./diet/口蘑虾滑拌饭.cook{}
+减肥餐-午餐: @./diet/盐葱鸡腿肉盖饭.cook{}
+
+宝宝餐-主食: @./babyfood/牛肉蒸饺.cook{}
+
+宝宝餐-肉菜: @./babyfood/虾滑蘑菇.cook{}
+
+宝宝餐-素菜: @./babyfood/糖拌小番茄.cook{}
 
 
 == Sunday (2026-09-20) ==
 
-减肥餐-晚餐: @./diet/蔬菜牛肉饭.cook{}
+减肥餐-晚餐: @./diet/生菜鸡肉滑蛋.cook{}
 
-减肥餐-午餐: @./diet/鸡丝盖饭.cook{}
+减肥餐-午餐: @./diet/蓄谋已久.cook{}
+
+宝宝餐-主食: @./babyfood/面.cook{}
+
+宝宝餐-肉菜: @./babyfood/土豆炖鸡.cook{}
+
+宝宝餐-素菜: @./babyfood/蒸紫薯.cook{}
 
