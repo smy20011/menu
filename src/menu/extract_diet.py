@@ -10,15 +10,71 @@ from dataclasses import dataclass, field
 import hashlib
 import http.cookiejar
 import json
+import os
 from pathlib import Path
 import re
 import time
+from typing import Any
 import urllib.parse
 import urllib.request
 
 COOKIE_FILE = "/home/deck/Downloads/www.bilibili.com_cookies.txt"
 MID = 313924270
 PAGE_SIZE = 30
+
+# OpenRouter 默认配置
+DEFAULT_OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+DEFAULT_OPENROUTER_MODEL = "nex-agi/nex-n2.5-mini:free"
+DEFAULT_FALLBACK_MODELS = [
+    "deepseek/deepseek-v4-flash-0731:free",
+    "cohere/north-mini-code:free",
+]
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_CACHE_FILE = Path(__file__).resolve().parent.parent.parent / ".diet_cache.json"
+
+UNIT_NORMALIZATION = {
+    "克": "g",
+    "千克": "kg",
+    "公斤": "kg",
+    "斤": "斤",
+    "两": "两",
+    "毫升": "ml",
+    "升": "L",
+    "勺": "大勺",
+    "汤匙": "大勺",
+    "大匙": "大勺",
+    "小勺": "茶匙",
+    "茶匙": "茶匙",
+    "个": "个",
+    "只": "只",
+    "根": "根",
+    "瓣": "瓣",
+    "朵": "朵",
+    "片": "片",
+    "张": "张",
+    "块": "块",
+    "把": "把",
+    "包": "包",
+    "盒": "盒",
+    "碗": "碗",
+}
+
+CATEGORY_MAP = {
+    "主食": "主食",
+    "碳水": "主食",
+    "主食类": "主食",
+    "肉菜": "肉菜",
+    "荤菜": "肉菜",
+    "肉类": "肉菜",
+    "素菜": "素菜",
+    "蔬菜": "素菜",
+    "素食": "素菜",
+    "汤品": "汤品",
+    "汤": "汤品",
+    "汤水": "汤品",
+    "早餐": "早餐",
+    "早点": "早餐",
+}
 
 # B站 Wbi 混淆索引表
 MIXIN_KEY_ENC_TAB = [
@@ -171,6 +227,7 @@ class DietRecipe:
     category: str
     calories: str | None
     ingredients: list[tuple[str, str, str]] = field(default_factory=list)
+    steps: list[str] = field(default_factory=list)
 
     def to_cooklang(self) -> str:
         tags = ["减肥餐", self.meal_type, self.category]
@@ -188,10 +245,15 @@ class DietRecipe:
         lines.append(f"source: {self.source_url}")
         lines.append("---")
         lines.append("")
-        for name, qty, unit in self.ingredients:
-            lines.append(f"@{name}{{{qty}%{unit}}}")
-        lines.append("")
-        return "\n".join(lines)
+        if self.steps:
+            for step in self.steps:
+                lines.append(step)
+                lines.append("")
+        else:
+            for name, qty, unit in self.ingredients:
+                lines.append(f"@{name}{{{qty}%{unit}}}")
+            lines.append("")
+        return "\n".join(lines).strip() + "\n"
 
 
 def get_opener(cookie_path: str) -> urllib.request.OpenerDirector:
@@ -212,6 +274,48 @@ def get_wbi_mixin_key(opener: urllib.request.OpenerDirector) -> str:
     sub_key = wbi_img["sub_url"].rsplit("/", 1)[1].split(".")[0]
     raw_key = img_key + sub_key
     return "".join([raw_key[n] for n in MIXIN_KEY_ENC_TAB])[:32]
+
+
+def fetch_video_subtitles(
+    bvid: str,
+    opener: urllib.request.OpenerDirector,
+    mixin_key: str,
+    aid: int | None = None,
+) -> str:
+    """尝试通过 Cookie + Wbi 签名获取视频真实台词字幕文本"""
+    try:
+        view_resp = opener.open(f"https://api.bilibili.com/x/web-interface/view?bvid={bvid}", timeout=10).read()
+        view_data = json.loads(view_resp.decode("utf-8")).get("data", {})
+        if not aid:
+            aid = view_data.get("aid")
+        cid = view_data.get("cid")
+
+        if not aid or not cid:
+            return ""
+
+        params = {"aid": aid, "cid": cid, "wts": int(time.time())}
+        clean_params = {k: "".join(c for c in str(v) if c not in "!'()*") for k, v in params.items()}
+        query = urllib.parse.urlencode(dict(sorted(clean_params.items())))
+        w_rid = hashlib.md5((query + mixin_key).encode("utf-8")).hexdigest()
+
+        v2_url = f"https://api.bilibili.com/x/player/wbi/v2?{query}&w_rid={w_rid}"
+        v2_resp = opener.open(v2_url, timeout=10).read()
+        v2_data = json.loads(v2_resp.decode("utf-8")).get("data", {})
+        subtitles_list = v2_data.get("subtitle", {}).get("subtitles", [])
+        if not subtitles_list:
+            return ""
+
+        sub_url = subtitles_list[0]["subtitle_url"]
+        if sub_url.startswith("//"):
+            sub_url = "https:" + sub_url
+
+        sub_resp = opener.open(sub_url, timeout=10).read()
+        sub_data = json.loads(sub_resp.decode("utf-8"))
+        texts = [item.get("content", "").strip() for item in sub_data.get("body", []) if item.get("content", "").strip()]
+        return " ".join(texts)
+    except Exception:
+        # 字幕获取失败时优雅降级
+        return ""
 
 
 def guess_ingredients(dish_name: str) -> tuple[str, list[tuple[str, str, str]]]:
@@ -302,9 +406,243 @@ def guess_ingredients(dish_name: str) -> tuple[str, list[tuple[str, str, str]]]:
     return category, ingredients
 
 
-def parse_video_item(bvid: str, title: str) -> list[DietRecipe]:
-    """从单个视频标题解析一道或多道菜品"""
+def load_cache(cache_path: Path) -> dict:
+    if cache_path.exists():
+        try:
+            return json.loads(cache_path.read_text(encoding="utf-8"))
+        except Exception as e:
+            print(f"读取缓存文件 {cache_path} 失败: {e}")
+    return {}
+
+
+def save_cache(cache: dict, cache_path: Path) -> None:
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp_file = cache_path.with_suffix(".tmp")
+        tmp_file.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp_file.replace(cache_path)
+    except Exception as e:
+        print(f"保存缓存文件 {cache_path} 失败: {e}")
+
+
+def clean_ingredient(raw_item: Any) -> tuple[str, str, str] | None:
+    if isinstance(raw_item, (list, tuple)) and len(raw_item) >= 3:
+        name = str(raw_item[0]).strip().lstrip("@#").strip()
+        qty = str(raw_item[1]).strip()
+        unit = str(raw_item[2]).strip()
+    elif isinstance(raw_item, dict):
+        name = str(raw_item.get("name", "")).strip().lstrip("@#").strip()
+        qty = str(raw_item.get("quantity", raw_item.get("amount", "1"))).strip()
+        unit = str(raw_item.get("unit", "g")).strip()
+    else:
+        return None
+
+    if not name or name in ["主要食材", "配料", "调料", "食材"]:
+        return None
+
+    unit = UNIT_NORMALIZATION.get(unit, unit)
+    qty = re.sub(r"[^0-9\./]", "", qty)
+    if not qty:
+        qty = "1"
+    try:
+        val = float(qty)
+        if val.is_integer():
+            qty = str(int(val))
+    except ValueError:
+        pass
+
+    return name, qty, unit
+
+
+def normalize_cooklang_step(step: str) -> str:
+    """规整步骤文本中的 Cooklang 食材与计时标记为标准格式"""
+    def _repl_ing(m):
+        name = m.group(1).strip()
+        body = m.group(2) or ""
+        if "%" not in body:
+            m_split = re.match(r"^([0-9\./]+)\s*(.*)$", body.strip())
+            if m_split:
+                qty = m_split.group(1)
+                unit = m_split.group(2).strip() or "g"
+                return f"@{name}{{{qty}%{unit}}}"
+        return m.group(0)
+
+    # 替换形如 @食材{100g} 为 @食材{100%g}
+    step = re.sub(r"@([^{}\s]+)\{([^}]*)\}", _repl_ing, step)
+    return step
+
+
+def extract_ingredients_llm(
+    dish_name: str,
+    video_title: str,
+    calories: str | None,
+    subtitles: str = "",
+    api_key: str | None = None,
+    model: str = DEFAULT_OPENROUTER_MODEL,
+    fallback_models: list[str] | None = None,
+    cache: dict | None = None,
+    cache_path: Path | None = None,
+    max_retries: int = 3,
+) -> tuple[str, list[tuple[str, str, str]], list[str]]:
+    """使用 OpenRouter Qwen 等大语言模型智能分析菜品食材、分类及烹饪步骤"""
+    if api_key is None:
+        api_key = os.environ.get("OPENROUTER_API_KEY", DEFAULT_OPENROUTER_API_KEY)
+
+    if fallback_models is None:
+        fallback_models = list(DEFAULT_FALLBACK_MODELS)
+
+    cache_key = dish_name.strip()
+    if cache is not None and cache_key in cache:
+        item = cache[cache_key]
+        if isinstance(item, dict) and "category" in item and "ingredients" in item:
+            steps = item.get("steps", [])
+            return item["category"], [tuple(ing) for ing in item["ingredients"]], steps
+
+    models_to_use = [model]
+    if fallback_models:
+        for m in fallback_models:
+            if m and m not in models_to_use:
+                models_to_use.append(m)
+
+    system_prompt = (
+        "你是一位减脂营养师与烹饪专家。你的任务是将视频食谱的食材配料与做法直接合并为标准的 Cooklang 步骤。\n"
+        "请严格输出符合以下结构的纯 JSON（不要附加任何解释或 markdown 以外的说明文字）：\n"
+        "{\n"
+        '  "category": "主食|肉菜|素菜|汤品|早餐",\n'
+        '  "steps": [\n'
+        '    "将切好的 @牛肉{150%g} 抓匀，喷 @食用油{2%g} 腌制 ~{15%分钟}。",\n'
+        '    "热锅下 @食用油{3%g}，倒入 @大蒜{3%瓣} 和 @虾仁{100%g} 炒至变色，倒回牛肉，淋 @生抽{1%大勺}、@蚝油{1%茶匙} 翻炒均匀，盖在 @米饭{170%g} 上。"\n'
+        "  ]\n"
+        "}\n"
+        "要求：\n"
+        "1. 食材必须直接内联在烹饪做法中，格式必须符合 Cooklang 规范：@食材名称{数量%单位}，严禁单独列出食材清单。\n"
+        "2. 优先根据字幕中提及的真实用量与配比提取；若未说明具体克数，按一人份减脂合理推测。\n"
+        "3. 数量必须为纯数字或小数字符串（如 '150', '1', '0.5'），严禁出现'适量'等词，少许调味写0.5或1。\n"
+        "4. 单位统一使用中文烹饪常见标准或符号（如 g, ml, 个, 根, 大勺, 茶匙, 瓣, 朵, 片, 张）。\n"
+        "5. 烹饪计时使用 ~{时间%单位} 标记（如 ~{2%分钟}）。\n"
+        "6. steps 包含 2-4 条精炼的步骤，必须涵盖视频中出现的所有主料、配菜、调味料（油、盐、生抽等）与主食，过滤掉口播废话（如求关注等）。"
+    )
+
+    user_prompt = f"菜品名称：{dish_name}\n视频标题：{video_title}"
+    if calories:
+        user_prompt += f"\n参考热量：{calories}"
+    if subtitles:
+        user_prompt += f"\n视频台词字幕：\n{subtitles}"
+
+    payload = {
+        "models": models_to_use,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        "temperature": 0.2,
+        "reasoning": {"effort": "low"},
+    }
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/menu-generator",
+        "X-Title": "Menu Generator",
+    }
+
+    for attempt in range(max_retries):
+        try:
+            req = urllib.request.Request(
+                OPENROUTER_API_URL,
+                data=json.dumps(payload).encode("utf-8"),
+                headers=headers,
+            )
+            with urllib.request.urlopen(req, timeout=35) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                choice = data.get("choices", [{}])[0]
+                content = choice.get("message", {}).get("content") or ""
+                used_model = data.get("model", "unknown")
+
+                if not content.strip():
+                    finish_reason = choice.get("finish_reason")
+                    raise ValueError(f"模型未返回文本内容 (finish_reason: {finish_reason})")
+
+                m = re.search(r"\{.*\}", content, re.DOTALL)
+                if not m:
+                    raise ValueError(f"未能从模型返回中提取 JSON: {content}")
+
+                parsed_json = json.loads(m.group(0))
+                raw_cat = parsed_json.get("category", "")
+                cat = CATEGORY_MAP.get(raw_cat, None)
+                if not cat:
+                    cat, _ = guess_ingredients(dish_name)
+
+                raw_steps = parsed_json.get("steps", [])
+                steps = [normalize_cooklang_step(str(s).strip()) for s in raw_steps if str(s).strip()]
+
+                # 从步骤中提取出所有内联的 @食材{数量%单位}
+                cleaned_ings = []
+                full_text = "\n".join(steps)
+                for m_ing in re.finditer(r"@([^{}\s]+)(?:\{([^%}]*)%?([^}]*)\})?", full_text):
+                    name = m_ing.group(1).strip()
+                    qty_raw = m_ing.group(2).strip() if m_ing.group(2) else "1"
+                    unit_raw = m_ing.group(3).strip() if m_ing.group(3) else ""
+                    if not unit_raw:
+                        m_split = re.match(r"^([0-9\./]+)\s*(.*)$", qty_raw)
+                        if m_split:
+                            qty_raw = m_split.group(1)
+                            unit_raw = m_split.group(2).strip()
+                    cleaned = clean_ingredient([name, qty_raw, unit_raw or "g"])
+                    if cleaned:
+                        cleaned_ings.append(cleaned)
+
+                # 兜底：若 steps 未提取出食材但返回了 ingredients
+                if not cleaned_ings:
+                    for item in parsed_json.get("ingredients", []):
+                        cleaned = clean_ingredient(item)
+                        if cleaned:
+                            cleaned_ings.append(cleaned)
+
+                if steps and cleaned_ings:
+                    sub_info = "含字幕" if subtitles else "无字幕"
+                    print(f"  [LLM] 《{dish_name}》合并提取成功 ({cat}, {len(cleaned_ings)}项食材, {len(steps)}个步骤, [{sub_info}], 模型: {used_model})")
+                    if cache is not None:
+                        cache[cache_key] = {
+                            "category": cat,
+                            "ingredients": cleaned_ings,
+                            "steps": steps,
+                            "model": used_model,
+                        }
+                        if cache_path:
+                            save_cache(cache, cache_path)
+                    return cat, cleaned_ings, steps
+                else:
+                    raise ValueError(f"提取结果不完整 (食材数: {len(cleaned_ings)}, 步骤数: {len(steps)})")
+
+        except Exception as e:
+            wait_time = 2 * (2**attempt)
+            print(f"  [LLM警告] 提取《{dish_name}》第 {attempt + 1} 次请求失败 ({e})，{wait_time}s 后重试...")
+            if attempt < max_retries - 1:
+                time.sleep(wait_time)
+
+    print(f"  [LLM降级] 模型提取《{dish_name}》失败，回退使用本地规则推测。")
+    cat, ings = guess_ingredients(dish_name)
+    return cat, ings, []
+
+
+def parse_video_item(
+    bvid: str,
+    title: str,
+    subtitles: str = "",
+    use_llm: bool = True,
+    api_key: str | None = None,
+    model: str = DEFAULT_OPENROUTER_MODEL,
+    fallback_models: list[str] | None = None,
+    cache: dict | None = None,
+    cache_path: Path | None = None,
+) -> list[DietRecipe]:
+    """从单个视频标题与字幕解析一道或多道菜品"""
     url = f"https://www.bilibili.com/video/{bvid}"
+    if api_key is None:
+        api_key = os.environ.get("OPENROUTER_API_KEY", DEFAULT_OPENROUTER_API_KEY)
+    if fallback_models is None:
+        fallback_models = list(DEFAULT_FALLBACK_MODELS)
 
     # 1. 提取卡路里
     cal_m = re.search(r"(\d+(?:\.\d+)?)\s*(?:千卡|kcal)", title, re.I)
@@ -346,7 +684,22 @@ def parse_video_item(bvid: str, title: str) -> list[DietRecipe]:
         if len(name) < 2 or name.startswith("靠吃瘦了") or name.startswith("三大营养素"):
             continue
 
-        category, ingredients = guess_ingredients(name)
+        if use_llm and api_key:
+            category, ingredients, steps = extract_ingredients_llm(
+                dish_name=name,
+                video_title=title,
+                calories=calories,
+                subtitles=subtitles,
+                api_key=api_key,
+                model=model,
+                fallback_models=fallback_models,
+                cache=cache,
+                cache_path=cache_path,
+            )
+        else:
+            category, ingredients = guess_ingredients(name)
+            steps = []
+
         recipe = DietRecipe(
             title=name,
             source_url=url,
@@ -354,13 +707,24 @@ def parse_video_item(bvid: str, title: str) -> list[DietRecipe]:
             category=category,
             calories=calories,
             ingredients=ingredients,
+            steps=steps,
         )
         recipes.append(recipe)
 
     return recipes
 
 
-def fetch_all_diet_recipes(cookie_path: str, mid: int, max_pages: int = 0) -> list[DietRecipe]:
+def fetch_all_diet_recipes(
+    cookie_path: str,
+    mid: int,
+    max_pages: int = 0,
+    with_subtitles: bool = True,
+    use_llm: bool = True,
+    api_key: str | None = None,
+    model: str = DEFAULT_OPENROUTER_MODEL,
+    fallback_models: list[str] | None = None,
+    cache_path: Path | None = None,
+) -> list[DietRecipe]:
     opener = get_opener(cookie_path)
     mixin_key = get_wbi_mixin_key(opener)
 
@@ -368,6 +732,7 @@ def fetch_all_diet_recipes(cookie_path: str, mid: int, max_pages: int = 0) -> li
     seen_titles = set()
     page = 1
     total_count = None
+    cache = load_cache(cache_path) if (cache_path and use_llm) else None
 
     while True:
         curr_time = int(time.time())
@@ -397,11 +762,28 @@ def fetch_all_diet_recipes(cookie_path: str, mid: int, max_pages: int = 0) -> li
             break
 
         for item in vlist:
-            parsed = parse_video_item(item["bvid"], item["title"])
+            subtitles = ""
+            if with_subtitles:
+                subtitles = fetch_video_subtitles(item["bvid"], opener, mixin_key, item.get("aid"))
+
+            parsed = parse_video_item(
+                bvid=item["bvid"],
+                title=item["title"],
+                subtitles=subtitles,
+                use_llm=use_llm,
+                api_key=api_key,
+                model=model,
+                fallback_models=fallback_models,
+                cache=cache,
+                cache_path=cache_path,
+            )
             for r in parsed:
                 if r.title not in seen_titles:
                     seen_titles.add(r.title)
                     recipes.append(r)
+
+        if cache_path and cache:
+            save_cache(cache, cache_path)
 
         print(f"已处理第 {page} 页，已提取独立菜品: {len(recipes)} 道")
 
@@ -414,6 +796,9 @@ def fetch_all_diet_recipes(cookie_path: str, mid: int, max_pages: int = 0) -> li
 
         page += 1
         time.sleep(0.3)
+
+    if cache_path and cache:
+        save_cache(cache, cache_path)
 
     return recipes
 
@@ -438,11 +823,84 @@ def main():
     parser.add_argument("--max-pages", type=int, default=0, help="最多抓取页数 (0 为抓取全部)")
     parser.add_argument("-f", "--force", action="store_true", default=True, help="是否覆盖已存在的同名菜谱")
 
+    # LLM 提取与字幕相关参数
+    parser.add_argument(
+        "--openrouter-key",
+        default=os.environ.get("OPENROUTER_API_KEY", DEFAULT_OPENROUTER_API_KEY),
+        help="OpenRouter API Key (默认优先从环境变量 OPENROUTER_API_KEY 读取)",
+    )
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_OPENROUTER_MODEL,
+        help=f"提取食材使用的 OpenRouter 模型，默认: {DEFAULT_OPENROUTER_MODEL}",
+    )
+    parser.add_argument(
+        "--fallback-models",
+        default=",".join(DEFAULT_FALLBACK_MODELS),
+        help="当主模型限流或不可用时的备用模型列表(逗号分隔)，默认: " + ",".join(DEFAULT_FALLBACK_MODELS),
+    )
+    parser.add_argument(
+        "--no-fallback",
+        action="store_true",
+        help="禁用备用模型，仅使用指定的 --model",
+    )
+    parser.add_argument(
+        "--no-subtitles",
+        action="store_true",
+        help="禁用视频字幕抓取，仅根据标题推测食材",
+    )
+    parser.add_argument(
+        "--no-llm",
+        action="store_true",
+        help="禁用 LLM 智能提取，回退使用本地规则字符串匹配",
+    )
+    parser.add_argument(
+        "--cache-file",
+        default=str(DEFAULT_CACHE_FILE),
+        help=f"食材提取缓存文件路径，默认: {DEFAULT_CACHE_FILE}",
+    )
+    parser.add_argument(
+        "--clear-cache",
+        action="store_true",
+        help="运行前清空食材提取缓存",
+    )
+
     opts = parser.parse_args()
     dest_path = Path(opts.dest)
+    cache_path = Path(opts.cache_file)
+
+    if opts.clear_cache and cache_path.exists():
+        cache_path.unlink()
+        print(f"已清空缓存文件: {cache_path}")
+
+    fallback_models = []
+    if not opts.no_fallback and opts.fallback_models:
+        fallback_models = [m.strip() for m in opts.fallback_models.split(",") if m.strip()]
+
+    use_llm = not opts.no_llm
+    with_subtitles = not opts.no_subtitles
+    if use_llm:
+        print(f"已启用 OpenRouter LLM 食材提取:")
+        print(f"  主模型: {opts.model}")
+        if fallback_models:
+            print(f"  备用模型: {', '.join(fallback_models)}")
+        print(f"  抓取字幕: {'是' if with_subtitles else '否'}")
+        print(f"  缓存路径: {cache_path}")
+    else:
+        print("未启用 LLM 提取，使用本地字符串词库规则匹配。")
 
     print(f"正在从 B 站抓取并解析食谱...")
-    recipes = fetch_all_diet_recipes(opts.cookie, opts.mid, opts.max_pages)
+    recipes = fetch_all_diet_recipes(
+        cookie_path=opts.cookie,
+        mid=opts.mid,
+        max_pages=opts.max_pages,
+        with_subtitles=with_subtitles,
+        use_llm=use_llm,
+        api_key=opts.openrouter_key,
+        model=opts.model,
+        fallback_models=fallback_models,
+        cache_path=cache_path,
+    )
     saved = save_recipes(recipes, dest_path, opts.force)
 
     print(f"\n成功生成 {saved} 份减脂菜谱文件至目录: {dest_path.resolve()}/")

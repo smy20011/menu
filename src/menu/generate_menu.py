@@ -122,6 +122,7 @@ def write_report(menu_file: Path, recipes: Recipes, date: datetime, dest: Path):
 
     data = cook_cli("recipe", "--format", "json", str(menu_file))
     result.append("## 每日菜谱")
+    found_recipes: list[Recipe] = []
     for section in data['sections']:
         result.append(f"### {section['name']}")
         for idx, steps in enumerate(section['content']):
@@ -135,12 +136,22 @@ def write_report(menu_file: Path, recipes: Recipes, date: datetime, dest: Path):
                     found = [r for r in recipes.recipes if full_path.endswith(r.metadata.filename)]
                     assert len(found) > 0, f"Cannot find recipe {full_path}"
                     recipe = found[0]
+                    found_recipes.append(recipe)
                     if recipe.metadata.source.startswith("http"):
                         line += f"[{recipe.name}]({recipe.metadata.source})"
                     else:
                         line += f"{recipe.name}"
             result.append(line)
         result.append("")
+
+    result.append("## 做法")
+    for recipe in found_recipes:
+        if recipe.metadata.source.startswith("http"):
+            result.append(f"### {recipe.name}")
+            result.append(f"[原视频]({recipe.metadata.source})")
+            md = cook_cli("recipe", "--format", "markdown", recipe.metadata.filename, parse_json=False)
+            md = re.sub(".*Steps", "", md, flags=re.DOTALL)
+            result.append(md)
 
     dest.write_text("\n".join(result))
 

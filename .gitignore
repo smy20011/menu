@@ -1,1 +1,3 @@
 __pycache__
+.diet_cache.json
+.diet_cache.tmp

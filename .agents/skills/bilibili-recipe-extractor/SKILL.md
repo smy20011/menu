@@ -81,8 +81,21 @@ B 站核心接口（个人空间投稿 `/x/space/wbi/arc/search`、视频字幕 
    ```bash
    uv run extract-diet --mid 313924270 --dest diet
    ```
-2. **规则推断**：
-   脚本通过 Wbi 自动翻页请求 `/x/space/wbi/arc/search`，由标题提取餐别（早餐/午餐/晚餐）与卡路里，并匹配内建蛋白质/蔬菜/主食词库，自动生成免 ASR 的食材配方存入目标目录。
+2. **智能推断与字幕联动**：
+   脚本通过 Wbi 自动拉取视频真实台词字幕文本，并交由 OpenRouter 大语言模型（默认免费模型 `qwen/qwen3.8-27b:free`，支持备用模型自动降级与本地词库保底）进行精准提取：
+   - 优先依据视频原台词中讲解的克数与配比提炼食材；
+   - 提取 2-4 步精炼的烹饪操作步骤写入 `.cook` 食谱文件；
+   - 本地自动缓存提取结果，避免重复请求。
+   ```bash
+   # 自动抓取字幕并进行 LLM 精准提取（默认行为）：
+   uv run extract-diet --mid 313924270 --dest diet
+
+   # 仅根据标题提取（不拉取字幕）：
+   uv run extract-diet --no-subtitles
+
+   # 禁用 LLM 回退到纯本地规则：
+   uv run extract-diet --no-llm
+   ```
 
 ---
 
