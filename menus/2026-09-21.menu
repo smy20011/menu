@@ -1,84 +1,84 @@
 == Monday (2026-09-21) ==
 
-减肥餐-晚餐: @./diet/豆芽牛肉拌饭.cook{}
+减肥餐-晚餐: @./diet/时蔬蒸全蛋.cook{}
 
-减肥餐-午餐: @./diet/自制牛排饭.cook{}
+减肥餐-午餐: @./diet/青椒鸡蛋拌饭.cook{}
 
-宝宝餐-主食: @./babyfood/牛肉胡萝卜汤面.cook{}
-
-宝宝餐-肉菜: @./babyfood/海鲜豆腐煲.cook{}
-
-宝宝餐-素菜: @./babyfood/炒栉瓜.cook{}
-
-
-== Tuesday (2026-09-22) ==
-
-减肥餐-晚餐: @./diet/照烧牛肉滑蛋饭.cook{}
-
-宝宝餐-主食: @./babyfood/三文鱼蔬菜拌饭.cook{}
-
-宝宝餐-肉菜: @./babyfood/卤香鹌鹑蛋.cook{}
-
-宝宝餐-素菜: @./babyfood/番茄白花菜.cook{}
-
-
-== Wednesday (2026-09-23) ==
-
-减肥餐-晚餐: @./diet/懒人版番茄肉酱意面.cook{}
-
-宝宝餐-主食: @./babyfood/黑米饭.cook{}
+宝宝餐-主食: @./babyfood/香菇肉沫炒饭.cook{}
 
 宝宝餐-肉菜: @./babyfood/台式蒸肉饼.cook{}
-
-宝宝餐-素菜: @./babyfood/清炒嫩豌豆.cook{}
-
-
-== Thursday (2026-09-24) ==
-
-减肥餐-晚餐: @./diet/低卡版麻婆豆腐.cook{}
-
-宝宝餐-主食: @./babyfood/玉米鱼片粥.cook{}
-
-宝宝餐-肉菜: @./babyfood/红烧牛腩.cook{}
-
-宝宝餐-素菜: @./babyfood/家常豆腐.cook{}
-
-
-== Friday (2026-09-25) ==
-
-减肥餐-晚餐: @./diet/盐焗鸡.cook{}
-
-减肥餐-午餐: @./diet/我很好拌饭.cook{}
-
-宝宝餐-主食: @./babyfood/台式肉燥面.cook{}
-
-宝宝餐-肉菜: @./babyfood/番茄鱼片.cook{}
 
 宝宝餐-素菜: @./babyfood/清炒花椰菜.cook{}
 
 
+== Tuesday (2026-09-22) ==
+
+减肥餐-晚餐: @./diet/番茄虾滑拌饭.cook{}
+
+宝宝餐-主食: @./babyfood/鸡蓉胡萝卜玉米粥.cook{}
+
+宝宝餐-肉菜: @./babyfood/番茄虾仁.cook{}
+
+宝宝餐-素菜: @./babyfood/玉米炒蛋.cook{}
+
+
+== Wednesday (2026-09-23) ==
+
+减肥餐-晚餐: @./diet/肉沫煎蛋拌饭.cook{}
+
+宝宝餐-主食: @./babyfood/牛肉蔬菜炒面.cook{}
+
+宝宝餐-肉菜: @./babyfood/番茄土豆牛肉.cook{}
+
+宝宝餐-素菜: @./babyfood/红烧豆腐.cook{}
+
+
+== Thursday (2026-09-24) ==
+
+减肥餐-晚餐: @./diet/花椒烤鲈鱼.cook{}
+
+宝宝餐-主食: @./babyfood/米饭.cook{}
+
+宝宝餐-肉菜: @./babyfood/豆角肉末.cook{}
+
+宝宝餐-素菜: @./babyfood/清炒青江菜.cook{}
+
+
+== Friday (2026-09-25) ==
+
+减肥餐-晚餐: @./diet/菌菇虾仁饭.cook{}
+
+减肥餐-午餐: @./diet/葱烧肥牛饭.cook{}
+
+宝宝餐-主食: @./babyfood/牛肉高丽菜焖饭.cook{}
+
+宝宝餐-肉菜: @./babyfood/肉末豆腐.cook{}
+
+宝宝餐-素菜: @./babyfood/清炒嫩豌豆.cook{}
+
+
 == Saturday (2026-09-26) ==
 
-减肥餐-晚餐: @./diet/低卡豆角焖面.cook{}
+减肥餐-晚餐: @./diet/烧椒鸡胸肉.cook{}
 
-减肥餐-午餐: @./diet/黑椒菌菇滑蛋.cook{}
+减肥餐-午餐: @./diet/水焖蛋.cook{}
 
-宝宝餐-主食: @./babyfood/味噌牛肉杂蔬拌饭.cook{}
+宝宝餐-主食: @./babyfood/鸡肉时蔬烩饭.cook{}
 
-宝宝餐-肉菜: @./babyfood/豆腐烩鱼片.cook{}
+宝宝餐-肉菜: @./babyfood/洋葱煎鸡排.cook{}
 
-宝宝餐-素菜: @./babyfood/清炒高丽菜.cook{}
+宝宝餐-素菜: @./babyfood/清炒菠菜.cook{}
 
 
 == Sunday (2026-09-27) ==
 
-减肥餐-晚餐: @./diet/肉蛋面.cook{}
+减肥餐-晚餐: @./diet/葱姜鸡腿焖饭.cook{}
 
-减肥餐-午餐: @./diet/口蘑炒肉盖饭.cook{}
+减肥餐-午餐: @./diet/鸡肉煲仔饭.cook{}
 
-宝宝餐-主食: @./babyfood/海鲜烩饭.cook{}
+宝宝餐-主食: @./babyfood/番茄土豆烩牛肉盖饭.cook{}
 
-宝宝餐-肉菜: @./babyfood/番茄虾滑.cook{}
+宝宝餐-肉菜: @./babyfood/马铃薯炖牛肉.cook{}
 
-宝宝餐-素菜: @./babyfood/清炒黄瓜.cook{}
+宝宝餐-素菜: @./babyfood/香煎胡萝卜马铃薯.cook{}
 
